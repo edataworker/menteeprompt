@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ClientForm from '@/components/ClientForm';
-import PromptLibrary from '@/components/PromptLibrary';
-import GenerateButton from '@/components/GenerateButton';
-import Toast from '@/components/Toast';
+import ClientForm from '../components/ClientForm';
+import PromptLibrary from '../components/PromptLibrary';
+import GenerateButton from '../components/GenerateButton';
+import Toast from '../components/Toast';
 
 export default function Home() {
   const [clientData, setClientData] = useState({
