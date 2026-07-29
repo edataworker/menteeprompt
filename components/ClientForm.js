@@ -118,25 +118,26 @@ export default function ClientForm({ clientData, setClientData }) {
           </label>
           
           <div className="flex flex-wrap items-center gap-3">
-            {/* VISIBLE Upload Button */}
-            <button
-              type="button"
-              onClick={triggerFileInput}
-              disabled={isUploading}
-              className="px-6 py-3 bg-[#004696] text-white rounded-lg hover:bg-[#00337a] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-base shadow-sm"
-            >
-              {isUploading ? '⏳ Processing...' : '📁 Choose File'}
-            </button>
-            
-            {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".xlsx,.xls,.csv,.json"
-              onChange={handleFileUpload}
-              disabled={isUploading}
-              className="hidden"
-            />
+          {/* VISIBLE Upload Button */}
+          <button
+            type="button"
+            onClick={triggerFileInput}
+            disabled={isUploading}
+            className="px-6 py-3 bg-[#004696] text-white rounded-lg hover:bg-[#00337a] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-base shadow-sm"
+          >
+            {isUploading ? '⏳ Processing...' : '📁 Choose File'}
+          </button>
+          
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv,.json"
+            onChange={handleFileUpload}
+            disabled={isUploading}
+            className="hidden"
+          />
+
             
             {fileName && (
               <span className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
