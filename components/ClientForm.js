@@ -14,6 +14,41 @@ export default function ClientForm({ clientData, setClientData }) {
     });
   };
 
+  // Add this function before the handleFileUpload function
+const parseSCORERawData = (text) => {
+  const result = {};
+  
+  // Extract key-value pairs using regex
+  const patterns = {
+    name: /^(Wesley\s+Maedo|Client\s*[:]\s*(.+))/mi,
+    businessName: /Account\s*Name\s*[:]\s*(.+)/i,
+    email: /Email\s*[:]\s*([^\s]+@[^\s]+)/i,
+    phone: /Phone\s*[:]\s*([\d\(\)\-\.\s\+]+)/i,
+    mailingAddress: /Mailing\s*Address\s*[:]\s*(.+?)(?:\n|$)/i,
+    caseNumber: /Case\s*Number\s*[:]\s*(\d+)/i,
+    mentoringType: /Mentoring\s*Type\s*[:]\s*(.+)/i,
+    businessType: /Type of Business\s*[:]\s*(.+)/i,
+    businessStage: /Business Stage\s*[:]\s*(.+)/i,
+    howDidYouHear: /How did you hear about SCORE\?\s*[:]\s*(.+)/i,
+    requestType: /Requested Mentor ID\s*[:]\s*(.+)/i,
+    status: /Status\s*[:]\s*(.+)/i,
+    question: /Question\s*[:]\s*(.+?)(?:\n|$)/i,
+  };
+
+  // Apply each pattern
+  for (const [key, pattern] of Object.entries(patterns)) {
+    const match = text.match(pattern);
+    if (match) {
+      result[key] = match[1] || match[2] || match[0] || '';
+    }
+  }
+
+  // Extract full text for notes
+  result.fullText = text;
+
+  return result;
+};
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
