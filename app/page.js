@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ClientForm from '../components/ClientForm';
-import PromptLibrary from '../components/PromptLibrary';
-import GenerateButton from '../components/GenerateButton';
-import Toast from '../components/Toast';
+import ClientDataInput from '@/components/ClientDataInput';
+import PromptLibrary from '@/components/PromptLibrary';
+import GenerateButton from '@/components/GenerateButton';
+import Toast from '@/components/Toast';
 
 export default function Home() {
   const [clientData, setClientData] = useState({
@@ -13,12 +13,11 @@ export default function Home() {
     email: '',
     phone: '',
     notes: '',
+    rawText: '', // For the raw client data
   });
   const [selectedPrompts, setSelectedPrompts] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toast, setToast] = useState(null);
-
-  // Load prompts from API on mount
   const [availablePrompts, setAvailablePrompts] = useState([]);
 
   useEffect(() => {
@@ -36,6 +35,10 @@ export default function Home() {
     { id: 'ME', label: 'Mentee Template', category: 'ME' },
     { id: 'SAM', label: 'SAM.gov', category: 'SAM' },
     { id: 'GE', label: 'GBP', category: 'GE' },
+    { id: 'GSC', label: 'GSC', category: 'GE' },
+    { id: 'MT', label: 'Marketing-Comprehensive', category: 'MT' },
+    { id: 'Web2', label: 'Website-Design', category: 'Web' },
+    { id: 'Web3', label: 'Website-eCommerce', category: 'Web' },
   ];
 
   const showToast = (message, type = 'success') => {
@@ -54,7 +57,7 @@ export default function Home() {
         </p>
       </header>
 
-      <ClientForm clientData={clientData} setClientData={setClientData} />
+      <ClientDataInput clientData={clientData} setClientData={setClientData} />
 
       <PromptLibrary
         prompts={availablePrompts}
