@@ -9,27 +9,19 @@ export default function GenerateButton({
   showToast,
 }) {
   const generateExcel = async () => {
-    // Validate client data
     if (!clientData.name && !clientData.rawText) {
       showToast('Please enter client name or paste raw data.', 'error');
       return;
     }
-
     if (selectedPrompts.length === 0) {
       showToast('Please select at least one prompt.', 'error');
       return;
     }
-
     setIsGenerating(true);
-
     try {
-      // Generate the Excel file
       const blob = await generateExcelFile(clientData, selectedPrompts);
       const date = new Date().toISOString().slice(0, 10);
-      
-      // Download the file
       saveAs(blob, `Grok_Ready_Prompt_Data_${date}.xlsx`);
-
       showToast(`✅ Excel file generated! (${selectedPrompts.length} prompts)`, 'success');
     } catch (error) {
       showToast('❌ Error generating file: ' + error.message, 'error');
@@ -39,20 +31,10 @@ export default function GenerateButton({
   };
 
   return (
-    <button
-      onClick={generateExcel}
-      disabled={isGenerating}
-      className="btn-primary flex items-center justify-center gap-2"
-    >
-      {isGenerating ? (
-        <>
-          <span className="animate-spin">⏳</span> Generating...
-        </>
-      ) : (
-        <>
-          🚀 Generate Clean Excel for Grok
-        </>
-      )}
+    <button onClick={generateExcel} disabled={isGenerating}
+      className="btn-primary flex items-center justify-center gap-2">
+      {isGenerating ? (<><span className="animate-spin">⏳</span> Generating...</>) :
+        (<>🚀 Generate Clean Excel for Grok</>)}
     </button>
   );
 }
