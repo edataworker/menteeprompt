@@ -4,6 +4,7 @@ import { useState } from 'react';
 export default function ClientForm({ clientData, setClientData }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [fileName, setFileName] = useState('');
 
   const handleChange = (e) => {
     setClientData({
@@ -16,15 +17,13 @@ export default function ClientForm({ clientData, setClientData }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
-    const validTypes = [
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel',
-      'text/csv',
-      'application/json'
-    ];
+    setFileName(file.name);
     
-    if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv') && !file.name.endsWith('.json')) {
+    // Validate file type
+    const validExtensions = ['.xlsx', '.xls', '.csv', '.json'];
+    const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    
+    if (!validExtensions.includes(fileExt)) {
       setUploadError('Please upload an Excel (.xlsx, .xls), CSV, or JSON file.');
       return;
     }
@@ -37,7 +36,7 @@ export default function ClientForm({ clientData, setClientData }) {
     reader.onload = (event) => {
       try {
         // Handle JSON files
-        if (file.name.endsWith('.json')) {
+        if (fileExt === '.json') {
           const jsonData = JSON.parse(event.target.result);
           if (Array.isArray(jsonData) && jsonData.length > 0) {
             mapDataToClient(jsonData[0]);
@@ -83,7 +82,7 @@ export default function ClientForm({ clientData, setClientData }) {
       company: row['Company'] || row['Business'] || row['Organization'] || row['company'] || '',
       email: row['Email'] || row['email'] || row['Email Address'] || '',
       phone: row['Phone'] || row['phone'] || row['Phone Number'] || row['Contact'] || '',
-      notes: JSON.stringify(row, null, 2) // Show all data as notes for reference
+      notes: JSON.stringify(row, null, 2)
     });
   };
 
@@ -96,37 +95,67 @@ export default function ClientForm({ clientData, setClientData }) {
       notes: '',
     });
     setUploadError('');
+    setFileName('');
+  };
+
+  const triggerFileInput = () => {
+    document.getElementById('fileInput').click();
   };
 
   return (
     <div className="card">
       <h2 className="section-title">📋 Client Data</h2>
       
-      {/* File Upload Section */}
+      {/* File Upload Section - Now with a visible button */}
       <div className="mb-4 p-4 bg-[#f5f8fa] rounded-lg border border-dashed border-[#004696]">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               📤 Import Client Data from File
             </label>
+            
+            {/* Hidden file input */}
             <input
+              id="fileInput"
               type="file"
               accept=".xlsx,.xls,.csv,.json"
               onChange={handleFileUpload}
               disabled={isUploading}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#004696] file:text-white hover:file:bg-[#00337a] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="hidden"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            
+            {/* Visible upload button */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={triggerFileInput}
+                disabled={isUploading}
+                className="px-5 py-2.5 bg-[#004696] text-white rounded-lg hover:bg-[#00337a] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                {isUploading ? '⏳ Processing...' : '📁 Choose File'}
+              </button>
+              
+              {fileName && (
+                <span className="text-sm text-gray-600 bg-white px-3 py-1 rounded border border-gray-200">
+                  📄 {fileName}
+                </span>
+              )}
+              
+              <button
+                type="button"
+                onClick={clearForm}
+                className="px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+              >
+                Clear All
+              </button>
+            </div>
+            
+            <p className="text-xs text-gray-400 mt-2">
               Supports: Excel (.xlsx, .xls), CSV, JSON
             </p>
           </div>
-          <button
-            onClick={clearForm}
-            className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition whitespace-nowrap"
-          >
-            Clear All
-          </button>
         </div>
+        
         {isUploading && (
           <div className="mt-2 text-sm text-[#004696]">
             ⏳ Processing file...
