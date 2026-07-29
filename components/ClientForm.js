@@ -50,77 +50,113 @@ const parseSCORERawData = (text) => {
 };
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    setFileName(file.name);
-    
-    // Validate file type
-    const validExtensions = ['.xlsx', '.xls', '.csv', '.json'];
-    const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-    
-    if (!validExtensions.includes(fileExt)) {
-      setUploadError('Please upload an Excel (.xlsx, .xls), CSV, or JSON file.');
-      return;
-    }
+  setFileName(file.name);
+  
+  const validExtensions = ['.xlsx', '.xls', '.csv', '.json', '.txt'];
+  const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+  
+  if (!validExtensions.includes(fileExt)) {
+    setUploadError('Please upload an Excel (.xlsx, .xls), CSV, JSON, or TXT file.');
+    return;
+  }
 
-    setIsUploading(true);
-    setUploadError('');
-    
-    const reader = new FileReader();
-    
-    reader.onload = (event) => {
-      try {
-        // Handle JSON files
-        if (fileExt === '.json') {
-          const jsonData = JSON.parse(event.target.result);
-          if (Array.isArray(jsonData) && jsonData.length > 0) {
-            mapDataToClient(jsonData[0]);
-          } else if (typeof jsonData === 'object') {
-            mapDataToClient(jsonData);
-          } else {
-            setUploadError('Invalid JSON format. Expected object or array.');
-          }
-          setIsUploading(false);
-          return;
-        }
-
-        // Handle Excel and CSV files
-        const data = new Uint8Array(event.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-        
-        if (jsonData.length > 0) {
-          mapDataToClient(jsonData[0]);
-        } else {
-          setUploadError('No data found in the uploaded file.');
-        }
-      } catch (error) {
-        setUploadError('Error reading file: ' + error.message);
+  setIsUploading(true);
+  setUploadError('');
+  
+  const reader = new FileReader();
+  
+  reader.onload = (event) => {
+    try {
+      // Handle TXT files (SCORE exports)
+      if (fileExt === '.txt') {
+        const text = event.target.result;
+        mapDataToClient(null, text);
+        setIsUploading(false);
+        return;
       }
-      setIsUploading(false);
-    };
-    
-    reader.onerror = () => {
-      setUploadError('Error reading file.');
-      setIsUploading(false);
-    };
+
+      // Handle JSON files
+      if (fileExt === '.json') {
+        const jsonData = JSON.parse(event.target.result);
+        if (Array.isArray(jsonData) && jsonData.length > 0) {
+          mapDataToClient(jsonData[0]);
+        } else if (typeof jsonData === 'object') {
+          mapDataToClient(jsonData);
+        } else {
+          setUploadError('Invalid JSON format.');
+        }
+        setIsUploading(false);
+        return;
+      }
+
+      // Handle Excel and CSV files
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+      
+      if (jsonData.length > 0) {
+        mapDataToClient(jsonData[0]);
+      } else {
+        setUploadError('No data found.');
+      }
+    } catch (error) {
+      setUploadError('Error reading file: ' + error.message);
+    }
+    setIsUploading(false);
+  };
+  
+  reader.onerror = () => {
+    setUploadError('Error reading file.');
+    setIsUploading(false);
+  };
+  
+  // Read as text for TXT files, binary for others
+  if (fileExt === '.txt') {
+    reader.readAsText(file);
+  } else {
+    reader.readAsArrayBuffer(file);
+  }
+  
+  e.target.value = '';
+};
     
     reader.readAsArrayBuffer(file);
     // Reset the input so the same file can be uploaded again
     e.target.value = '';
   };
 
-  const mapDataToClient = (row) => {
+  const mapDataToClient = (row, rawText = null) => {
+  // If we have raw text from a SCORE export, parse it
+  if (rawText && typeof rawText === 'string') {
+    const parsed = parseSCORERawData(rawText);
     setClientData({
-      name: row['Name'] || row['Client Name'] || row['Client'] || row['Full Name'] || row['name'] || '',
-      company: row['Company'] || row['Business'] || row['Organization'] || row['company'] || '',
-      email: row['Email'] || row['email'] || row['Email Address'] || '',
-      phone: row['Phone'] || row['phone'] || row['Phone Number'] || row['Contact'] || '',
-      notes: JSON.stringify(row, null, 2)
+      name: parsed.name || '',
+      company: parsed.businessName || '',
+      email: parsed.email || '',
+      phone: parsed.phone || '',
+      notes: JSON.stringify(parsed, null, 2),
+      // Store the raw text for the Excel generation
+      rawData: rawText,
+      parsedData: parsed,
     });
-  };
+    return;
+  }
+
+  // Regular mapping for structured data (Excel/CSV/JSON)
+  setClientData({
+    name: row['Name'] || row['Client Name'] || row['Client'] || row['Full Name'] || row['name'] || '',
+    company: row['Company'] || row['Business'] || row['Organization'] || row['company'] || '',
+    email: row['Email'] || row['email'] || row['Email Address'] || '',
+    phone: row['Phone'] || row['phone'] || row['Phone Number'] || row['Contact'] || '',
+    notes: JSON.stringify(row, null, 2),
+    rawData: null,
+    parsedData: null,
+  });
+};
 
   const clearForm = () => {
     setClientData({
