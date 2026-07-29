@@ -1,3 +1,5 @@
+'use client';
+
 import { saveAs } from 'file-saver';
 import { generateExcelFile } from '../lib/excelGenerator';
 
@@ -24,6 +26,7 @@ export default function GenerateButton({
       saveAs(blob, `Grok_Ready_Prompt_Data_${date}.xlsx`);
       showToast(`✅ Excel file generated! (${selectedPrompts.length} prompts)`, 'success');
     } catch (error) {
+      console.error('Generate error:', error);
       showToast('❌ Error generating file: ' + error.message, 'error');
     } finally {
       setIsGenerating(false);
@@ -31,10 +34,20 @@ export default function GenerateButton({
   };
 
   return (
-    <button onClick={generateExcel} disabled={isGenerating}
-      className="btn-primary flex items-center justify-center gap-2">
-      {isGenerating ? (<><span className="animate-spin">⏳</span> Generating...</>) :
-        (<>🚀 Generate Clean Excel for Grok</>)}
+    <button
+      onClick={generateExcel}
+      disabled={isGenerating}
+      className="btn-primary flex items-center justify-center gap-2"
+    >
+      {isGenerating ? (
+        <>
+          <span className="animate-spin">⏳</span> Generating...
+        </>
+      ) : (
+        <>
+          🚀 Generate Clean Excel for Grok
+        </>
+      )}
     </button>
   );
 }
