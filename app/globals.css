@@ -6,8 +6,16 @@
   --primary: #004696;
   --primary-light: #e6f0fa;
   --primary-dark: #00337a;
+  --primary-hover: #0056b3;
   --gray-light: #f5f8fa;
   --gray-border: #d0d7de;
+  --gray-text: #475569;
+  --gray-dark: #1e293b;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --radius: 12px;
 }
 
 * {
@@ -17,34 +25,143 @@
 }
 
 body {
-  font-family: 'Tahoma', 'Segoe UI', sans-serif;
-  background: #f0f4f8;
-  color: #1a1a1a;
+  font-family: 'Inter', 'Tahoma', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8fafc;
+  color: var(--gray-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ===== UTILITY CLASSES ===== */
 @layer components {
+  .page-container {
+    @apply max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10;
+  }
+
   .card {
-    @apply bg-white rounded-xl shadow-md p-6;
+    @apply bg-white rounded-xl shadow-sm border border-gray-100/80 p-5 sm:p-6 transition-shadow hover:shadow-md;
   }
-  .section-title {
-    @apply text-lg font-bold text-[#004696] mb-4;
+
+  .card-header {
+    @apply flex items-center justify-between mb-4;
   }
+
+  .card-title {
+    @apply text-lg font-semibold text-gray-800 flex items-center gap-2;
+  }
+
+  .card-title .icon {
+    @apply text-xl;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg bg-white 
+           focus:outline-none focus:ring-2 focus:ring-[#004696]/30 focus:border-[#004696] 
+           transition-all duration-200 placeholder:text-gray-400;
+  }
+
+  .textarea-field {
+    @apply w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg bg-white 
+           focus:outline-none focus:ring-2 focus:ring-[#004696]/30 focus:border-[#004696] 
+           transition-all duration-200 placeholder:text-gray-400 min-h-[100px] resize-y;
+  }
+
   .btn-primary {
-    @apply w-full py-4 px-6 text-lg font-bold text-white bg-[#004696] rounded-xl hover:bg-[#00337a] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold 
+           text-white bg-[#004696] rounded-lg hover:bg-[#00337a] 
+           transition-all duration-200 shadow-sm hover:shadow-md 
+           disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-[#004696];
   }
+
   .btn-primary:active {
     @apply scale-[0.98];
   }
-  .input-field {
-    @apply w-full px-4 py-3 text-base border border-[#d0d7de] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004696] focus:border-transparent transition;
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium 
+           text-[#004696] bg-[#e6f0fa] rounded-lg hover:bg-[#d0e0f0] 
+           transition-all duration-200;
   }
-  .checkbox-label {
-    @apply flex items-center cursor-pointer py-2 px-3 rounded-lg hover:bg-gray-50 transition;
-  }
-  .checkbox-label input[type="checkbox"] {
-    @apply w-5 h-5 mr-3 accent-[#004696] cursor-pointer;
-  }
+
   .badge {
-    @apply inline-block text-xs px-3 py-1 rounded-full bg-[#e6f0fa] text-[#004696] ml-2;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+           bg-[#e6f0fa] text-[#004696];
+  }
+
+  .badge-sm {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium 
+           bg-[#e6f0fa] text-[#004696];
+  }
+
+  .checkbox-label {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer 
+           hover:bg-gray-50 transition-colors duration-150 text-sm;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    @apply w-4 h-4 rounded border-gray-300 text-[#004696] 
+           focus:ring-2 focus:ring-[#004696]/30 focus:ring-offset-0;
+  }
+
+  .upload-zone {
+    @apply border-2 border-dashed border-gray-200 rounded-xl p-6 
+           hover:border-[#004696]/50 hover:bg-[#f8fafc] transition-all duration-200;
+  }
+
+  .divider {
+    @apply border-t border-gray-100 my-6;
+  }
+
+  .page-title {
+    @apply text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-gray-500 mt-1;
+  }
+
+  .hero-icon {
+    @apply text-4xl sm:text-5xl;
+  }
+}
+
+/* ===== LOADING SPINNER ===== */
+.spinner {
+  @apply inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .card {
+    @apply p-4;
+  }
+  .btn-primary {
+    @apply w-full justify-center;
   }
 }
