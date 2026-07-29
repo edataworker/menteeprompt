@@ -1,10 +1,11 @@
 import * as XLSX from 'xlsx';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 export default function ClientForm({ clientData, setClientData }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     setClientData({
@@ -96,27 +97,40 @@ export default function ClientForm({ clientData, setClientData }) {
     });
     setUploadError('');
     setFileName('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const triggerFileInput = () => {
-    document.getElementById('fileInput').click();
+    fileInputRef.current.click();
   };
 
   return (
     <div className="card">
       <h2 className="section-title">📋 Client Data</h2>
       
-      {/* File Upload Section - Now with a visible button */}
-      <div className="mb-4 p-4 bg-[#f5f8fa] rounded-lg border border-dashed border-[#004696]">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📤 Import Client Data from File
-            </label>
+      {/* File Upload Section with VISIBLE button */}
+      <div className="mb-4 p-4 bg-[#f5f8fa] rounded-lg border-2 border-dashed border-[#004696]">
+        <div className="flex flex-col gap-3">
+          <label className="text-sm font-medium text-gray-700">
+            📤 Import Client Data from File
+          </label>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            {/* VISIBLE Upload Button */}
+            <button
+              type="button"
+              onClick={triggerFileInput}
+              disabled={isUploading}
+              className="px-6 py-3 bg-[#004696] text-white rounded-lg hover:bg-[#00337a] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-base shadow-sm"
+            >
+              {isUploading ? '⏳ Processing...' : '📁 Choose File'}
+            </button>
             
             {/* Hidden file input */}
             <input
-              id="fileInput"
+              ref={fileInputRef}
               type="file"
               accept=".xlsx,.xls,.csv,.json"
               onChange={handleFileUpload}
@@ -124,36 +138,24 @@ export default function ClientForm({ clientData, setClientData }) {
               className="hidden"
             />
             
-            {/* Visible upload button */}
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={triggerFileInput}
-                disabled={isUploading}
-                className="px-5 py-2.5 bg-[#004696] text-white rounded-lg hover:bg-[#00337a] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              >
-                {isUploading ? '⏳ Processing...' : '📁 Choose File'}
-              </button>
-              
-              {fileName && (
-                <span className="text-sm text-gray-600 bg-white px-3 py-1 rounded border border-gray-200">
-                  📄 {fileName}
-                </span>
-              )}
-              
-              <button
-                type="button"
-                onClick={clearForm}
-                className="px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-              >
-                Clear All
-              </button>
-            </div>
+            {fileName && (
+              <span className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
+                📄 {fileName}
+              </span>
+            )}
             
-            <p className="text-xs text-gray-400 mt-2">
-              Supports: Excel (.xlsx, .xls), CSV, JSON
-            </p>
+            <button
+              type="button"
+              onClick={clearForm}
+              className="px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition shadow-sm"
+            >
+              Clear All
+            </button>
           </div>
+          
+          <p className="text-xs text-gray-400">
+            Supports: Excel (.xlsx, .xls), CSV, JSON
+          </p>
         </div>
         
         {isUploading && (
