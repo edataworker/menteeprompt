@@ -1,7 +1,6 @@
 'use client';
 
 import { saveAs } from 'file-saver';
-import { generateExcelFile } from '../lib/excelGenerator';
 
 export default function GenerateButton({
   clientData,
@@ -19,11 +18,25 @@ export default function GenerateButton({
       showToast('Please select at least one prompt.', 'error');
       return;
     }
+
     setIsGenerating(true);
+
     try {
-      const blob = await generateExcelFile(clientData, selectedPrompts);
+      const response = await fetch('/api/generate-excel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientData, selectedPrompts }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate Excel');
+      }
+
+      const blob = await response.blob();
       const date = new Date().toISOString().slice(0, 10);
       saveAs(blob, `Grok_Ready_Prompt_Data_${date}.xlsx`);
+
       showToast(`✅ Excel file generated! (${selectedPrompts.length} prompts)`, 'success');
     } catch (error) {
       console.error('Generate error:', error);
