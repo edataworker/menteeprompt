@@ -5,10 +5,8 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
           <p>© {new Date().getFullYear()} Prompt Generator</p>
           <p className="flex items-center gap-4 mt-2 md:mt-0">
-            <span>⚡ Built with Next.js</span>
-            <span>•</span>
-            <span>📦 SheetJS</span>
-            <span>•</span>
+            <span>⚡ Built with Next.js</span><span>•</span>
+            <span>📦 SheetJS</span><span>•</span>
             <span>🚀 Deployed on Vercel</span>
           </p>
         </div>
