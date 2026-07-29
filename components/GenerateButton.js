@@ -1,5 +1,5 @@
 import { saveAs } from 'file-saver';
-import { generateExcelFile } from '@/lib/excelGenerator';
+import { generateExcelFile } from '../lib/excelGenerator';
 
 export default function GenerateButton({
   clientData,
@@ -9,6 +9,7 @@ export default function GenerateButton({
   showToast,
 }) {
   const generateExcel = async () => {
+    // Validate client data
     if (!clientData.name && !clientData.rawText) {
       showToast('Please enter client name or paste raw data.', 'error');
       return;
@@ -22,8 +23,11 @@ export default function GenerateButton({
     setIsGenerating(true);
 
     try {
+      // Generate the Excel file
       const blob = await generateExcelFile(clientData, selectedPrompts);
       const date = new Date().toISOString().slice(0, 10);
+      
+      // Download the file
       saveAs(blob, `Grok_Ready_Prompt_Data_${date}.xlsx`);
 
       showToast(`✅ Excel file generated! (${selectedPrompts.length} prompts)`, 'success');
