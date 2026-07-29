@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ClientDataInput from '@/components/ClientDataInput';
-import PromptLibrary from '@/components/PromptLibrary';
-import GenerateButton from '@/components/GenerateButton';
-import Toast from '@/components/Toast';
+import ClientDataInput from '../components/ClientDataInput';
+import PromptLibrary from '../components/PromptLibrary';
+import GenerateButton from '../components/GenerateButton';
+import Toast from '../components/Toast';
+// Remove these if they don't exist yet:
+// import Navigation from '../components/Navigation';
+// import Footer from '../components/Footer';
 
 export default function Home() {
   const [clientData, setClientData] = useState({
@@ -13,7 +16,7 @@ export default function Home() {
     email: '',
     phone: '',
     notes: '',
-    rawText: '', // For the raw client data
+    rawText: '',
   });
   const [selectedPrompts, setSelectedPrompts] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
