@@ -1,13 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ClientDataInput from '../components/ClientDataInput';
-import PromptLibrary from '../components/PromptLibrary';
-import GenerateButton from '../components/GenerateButton';
-import Toast from '../components/Toast';
-// Remove these if they don't exist yet:
-// import Navigation from '../components/Navigation';
-// import Footer from '../components/Footer';
+import ClientDataInput from '@/components/ClientDataInput';
+import PromptLibrary from '@/components/PromptLibrary';
+import GenerateButton from '@/components/GenerateButton';
+import Toast from '@/components/Toast';
 
 export default function Home() {
   const [clientData, setClientData] = useState({
@@ -17,6 +14,7 @@ export default function Home() {
     phone: '',
     notes: '',
     rawText: '',
+    parsedData: null,
   });
   const [selectedPrompts, setSelectedPrompts] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -50,31 +48,42 @@ export default function Home() {
   };
 
   return (
-    <div className="space-y-6">
-      <header className="text-center py-4">
-        <h1 className="text-3xl md:text-4xl font-bold text-[#004696]">
-          🚀 Prompt Generator
-        </h1>
-        <p className="text-gray-600 mt-2 text-sm md:text-base">
-          Generate clean Excel files ready for Grok upload
+    <div className="page-container">
+      {/* Hero Section */}
+      <div className="text-center mb-8 sm:mb-10 animate-fade-in-up">
+        <div className="hero-icon mb-3">🚀</div>
+        <h1 className="page-title">Prompt Generator</h1>
+        <p className="page-subtitle max-w-xl mx-auto">
+          Generate clean, professional Excel files ready for Grok upload — built for SCORE mentors.
         </p>
-      </header>
+        <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-400">
+          <span className="badge-sm">v2.0</span>
+          <span className="w-px h-3 bg-gray-200"></span>
+          <span>Excel · Grok · SCORE</span>
+        </div>
+      </div>
 
-      <ClientDataInput clientData={clientData} setClientData={setClientData} />
+      <div className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <ClientDataInput clientData={clientData} setClientData={setClientData} />
+      </div>
 
-      <PromptLibrary
-        prompts={availablePrompts}
-        selected={selectedPrompts}
-        setSelected={setSelectedPrompts}
-      />
+      <div className="mt-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+        <PromptLibrary
+          prompts={availablePrompts}
+          selected={selectedPrompts}
+          setSelected={setSelectedPrompts}
+        />
+      </div>
 
-      <GenerateButton
-        clientData={clientData}
-        selectedPrompts={selectedPrompts}
-        setIsGenerating={setIsGenerating}
-        isGenerating={isGenerating}
-        showToast={showToast}
-      />
+      <div className="mt-8 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+        <GenerateButton
+          clientData={clientData}
+          selectedPrompts={selectedPrompts}
+          setIsGenerating={setIsGenerating}
+          isGenerating={isGenerating}
+          showToast={showToast}
+        />
+      </div>
 
       {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
