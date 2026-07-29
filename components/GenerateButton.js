@@ -1,5 +1,5 @@
 import { saveAs } from 'file-saver';
-import * as XLSX from 'xlsx';
+import { generateExcelFile } from '@/lib/excelGenerator';
 
 export default function GenerateButton({
   clientData,
@@ -9,8 +9,8 @@ export default function GenerateButton({
   showToast,
 }) {
   const generateExcel = async () => {
-    if (!clientData.name.trim()) {
-      showToast('Please enter at least the client name.', 'error');
+    if (!clientData.name && !clientData.rawText) {
+      showToast('Please enter client name or paste raw data.', 'error');
       return;
     }
 
@@ -22,19 +22,11 @@ export default function GenerateButton({
     setIsGenerating(true);
 
     try {
-      // Get full prompt data
-      const res = await fetch('/api/prompts');
-      const allPrompts = await res.json();
-      const selectedPromptData = allPrompts.filter((p) =>
-        selectedPrompts.includes(p.id)
-      );
-
-      // Generate Excel
-      const blob = await generateExcelFile(clientData, selectedPromptData);
+      const blob = await generateExcelFile(clientData, selectedPrompts);
       const date = new Date().toISOString().slice(0, 10);
       saveAs(blob, `Grok_Ready_Prompt_Data_${date}.xlsx`);
 
-      showToast(`✅ Excel file generated successfully! (${selectedPromptData.length} prompts)`, 'success');
+      showToast(`✅ Excel file generated! (${selectedPrompts.length} prompts)`, 'success');
     } catch (error) {
       showToast('❌ Error generating file: ' + error.message, 'error');
     } finally {
@@ -54,91 +46,9 @@ export default function GenerateButton({
         </>
       ) : (
         <>
-          📥 Generate Excel for Grok
+          🚀 Generate Clean Excel for Grok
         </>
       )}
     </button>
   );
-}
-
-// Excel generation logic
-async function generateExcelFile(clientData, selectedPrompts) {
-  const wb = XLSX.utils.book_new();
-
-  // 1. Client Sheet
-  const clientSheetData = [
-    ['Client Name', 'Company', 'Email', 'Phone', 'Generated On'],
-    [
-      clientData.name || 'Not specified',
-      clientData.company || 'Not specified',
-      clientData.email || 'Not specified',
-      clientData.phone || 'Not specified',
-      new Date().toLocaleString(),
-    ],
-    [],
-    ['Additional Notes'],
-    [clientData.notes || ''],
-  ];
-  const wsClient = XLSX.utils.aoa_to_sheet(clientSheetData);
-  XLSX.utils.book_append_sheet(wb, wsClient, 'Client');
-
-  // 2. Library Sheet
-  const libraryData = [
-    ['Run', 'Category', 'Description'],
-    ...selectedPrompts.map((p) => ['Y', p.category, p.label]),
-  ];
-  // Add unchecked prompts too
-  const res = await fetch('/api/prompts');
-  const allPrompts = await res.json();
-  allPrompts.forEach((p) => {
-    if (!selectedPrompts.some((sp) => sp.id === p.id)) {
-      libraryData.push(['N', p.category, p.label]);
-    }
-  });
-  const wsLibrary = XLSX.utils.aoa_to_sheet(libraryData);
-  XLSX.utils.book_append_sheet(wb, wsLibrary, 'Library');
-
-  // 3. Master Prompt Sheet
-  const masterData = [
-    ['MASTER PROMPT - TAHOMA 12pt'],
-    [''],
-    ['Generated: ' + new Date().toLocaleString()],
-    ['Client: ' + clientData.name],
-    ['Company: ' + clientData.company || 'Not specified'],
-    ['Email: ' + clientData.email || 'Not specified'],
-    [''],
-    ['A0: GROK SYSTEM CONTRACT (READ FIRST)'],
-    ['You Are: an executive level, decision grade pro bono business mentor...'],
-    [''],
-    ['AA: GOAL AND KEY PROMPTING FACTORS'],
-    ['Define Your Goal Here (required): Generate comprehensive business deliverables...'],
-    [''],
-    ['SELECTED DELIVERABLES:'],
-  ];
-  selectedPrompts.forEach((p, i) => {
-    masterData.push(['']);
-    masterData.push(['DELIVERABLE ' + (i + 1) + ': ' + p.label]);
-    masterData.push(['Category: ' + p.category]);
-    masterData.push(['']);
-  });
-  const wsMaster = XLSX.utils.aoa_to_sheet(masterData);
-  XLSX.utils.book_append_sheet(wb, wsMaster, 'Master Prompt');
-
-  // 4. Individual Prompt Sheets
-  selectedPrompts.forEach((p) => {
-    const data = [
-      ['PROMPT: ' + p.label],
-      ['Category: ' + p.category],
-      [''],
-      ['[Instructions for ' + p.label + ' go here]'],
-      [''],
-      ['Generated: ' + new Date().toLocaleString()],
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    let sheetName = p.label.replace(/[^a-zA-Z0-9 \-]/g, '').substring(0, 31);
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  });
-
-  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-  return new Blob([wbout], { type: 'application/octet-stream' });
 }
