@@ -15,24 +15,33 @@ export default function ClientDataInput({ clientData, setClientData }) {
   };
 
   const parseSCORERawData = (text) => {
-    const result = {};
-    const patterns = {
-      name: /^(Wesley\s+Maedo|Client\s*[:]\s*(.+))/mi,
-      businessName: /Account\s*Name\s*[:]\s*(.+)/i,
-      email: /Email\s*[:]\s*([^\s]+@[^\s]+)/i,
-      phone: /Phone\s*[:]\s*([\d\(\)\-\.\s\+]+)/i,
-      caseNumber: /Case\s*Number\s*[:]\s*(\d+)/i,
-      mentoringType: /Mentoring\s*Type\s*[:]\s*(.+)/i,
-      businessType: /Type of Business\s*[:]\s*(.+)/i,
-      status: /Status\s*[:]\s*(.+)/i,
-      question: /Question\s*[:]\s*(.+?)(?:\n|$)/i,
-    };
-    for (const [key, pattern] of Object.entries(patterns)) {
-      const match = text.match(pattern);
-      if (match) result[key] = match[1] || match[2] || match[0] || '';
-    }
-    return result;
+  const result = {};
+  
+  const patterns = {
+    name: /^(?:Client|Name|Full Name|Contact)\s*[:]\s*(.+)|^(Wesley\s+Maedo)/mi,
+    businessName: /(?:Account|Business|Company)\s*Name\s*[:]\s*(.+)/i,
+    email: /Email\s*[:]\s*([^\s]+@[^\s]+)/i,
+    phone: /Phone\s*[:]\s*([\d\(\)\-\.\s\+]+)/i,
+    mailingAddress: /Mailing\s*Address\s*[:]\s*(.+?)(?:\n|$)/i,
+    caseNumber: /Case\s*Number\s*[:]\s*(\d+)/i,
+    mentoringType: /Mentoring\s*Type\s*[:]\s*(.+)/i,
+    businessType: /Type of Business\s*[:]\s*(.+)/i,
+    businessStage: /Business Stage\s*[:]\s*(.+)/i,
+    status: /Status\s*[:]\s*(.+)/i,
+    question: /Question\s*[:]\s*(.+?)(?:\n|$)/i,
+    organization: /Organization\s*[:]\s*(.+)/i,
+    referral: /Referrer\s*Name\s*[:]\s*(.+)/i,
   };
+
+  for (const [key, pattern] of Object.entries(patterns)) {
+    const match = text.match(pattern);
+    if (match) {
+      result[key] = (match[1] || match[2] || match[0] || '').trim();
+    }
+  }
+
+  return result;
+};
 
   const mapDataToClient = (row, rawText = null) => {
     if (rawText && typeof rawText === 'string') {
