@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 
@@ -8,40 +10,33 @@ export default function ClientDataInput({ clientData, setClientData }) {
   const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
-    setClientData({
-      ...clientData,
-      [e.target.name]: e.target.value,
-    });
+    setClientData({ ...clientData, [e.target.name]: e.target.value });
   };
 
+  // Enhanced parsing function
   const parseSCORERawData = (text) => {
-  const result = {};
-  
-  const patterns = {
-    name: /^(?:Client|Name|Full Name|Contact)\s*[:]\s*(.+)|^(Wesley\s+Maedo)/mi,
-    businessName: /(?:Account|Business|Company)\s*Name\s*[:]\s*(.+)/i,
-    email: /Email\s*[:]\s*([^\s]+@[^\s]+)/i,
-    phone: /Phone\s*[:]\s*([\d\(\)\-\.\s\+]+)/i,
-    mailingAddress: /Mailing\s*Address\s*[:]\s*(.+?)(?:\n|$)/i,
-    caseNumber: /Case\s*Number\s*[:]\s*(\d+)/i,
-    mentoringType: /Mentoring\s*Type\s*[:]\s*(.+)/i,
-    businessType: /Type of Business\s*[:]\s*(.+)/i,
-    businessStage: /Business Stage\s*[:]\s*(.+)/i,
-    status: /Status\s*[:]\s*(.+)/i,
-    question: /Question\s*[:]\s*(.+?)(?:\n|$)/i,
-    organization: /Organization\s*[:]\s*(.+)/i,
-    referral: /Referrer\s*Name\s*[:]\s*(.+)/i,
-  };
-
-  for (const [key, pattern] of Object.entries(patterns)) {
-    const match = text.match(pattern);
-    if (match) {
-      result[key] = (match[1] || match[2] || match[0] || '').trim();
+    const result = {};
+    const patterns = {
+      name: /^(?:Client|Name|Full Name|Contact)\s*[:]\s*(.+)|^(Wesley\s+Maedo)/mi,
+      businessName: /(?:Account|Business|Company)\s*Name\s*[:]\s*(.+)/i,
+      email: /Email\s*[:]\s*([^\s]+@[^\s]+)/i,
+      phone: /Phone\s*[:]\s*([\d\(\)\-\.\s\+]+)/i,
+      mailingAddress: /Mailing\s*Address\s*[:]\s*(.+?)(?:\n|$)/i,
+      caseNumber: /Case\s*Number\s*[:]\s*(\d+)/i,
+      mentoringType: /Mentoring\s*Type\s*[:]\s*(.+)/i,
+      businessType: /Type of Business\s*[:]\s*(.+)/i,
+      businessStage: /Business Stage\s*[:]\s*(.+)/i,
+      status: /Status\s*[:]\s*(.+)/i,
+      question: /Question\s*[:]\s*(.+?)(?:\n|$)/i,
+    };
+    for (const [key, pattern] of Object.entries(patterns)) {
+      const match = text.match(pattern);
+      if (match) {
+        result[key] = (match[1] || match[2] || match[0] || '').trim();
+      }
     }
-  }
-
-  return result;
-};
+    return result;
+  };
 
   const mapDataToClient = (row, rawText = null) => {
     if (rawText && typeof rawText === 'string') {
@@ -115,33 +110,117 @@ export default function ClientDataInput({ clientData, setClientData }) {
 
   return (
     <div className="card">
-      <h2 className="section-title">📋 Client Data</h2>
-      <div className="mb-4 p-4 bg-[#f5f8fa] rounded-lg border-2 border-dashed border-[#004696]">
-        <div className="flex flex-col gap-3">
-          <label className="text-sm font-medium text-gray-700">📤 Upload Client Data File</label>
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={triggerFileInput} disabled={isUploading}
-              className="px-6 py-3 bg-[#004696] text-white rounded-lg hover:bg-[#00337a] transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-base shadow-sm">
+      <div className="card-header">
+        <h2 className="card-title">
+          <span className="icon">📋</span> Client Data
+        </h2>
+        <button
+          type="button"
+          onClick={clearForm}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Clear all
+        </button>
+      </div>
+
+      {/* Upload Section */}
+      <div className="upload-zone mb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-gray-700">Import from file</p>
+            <p className="text-xs text-gray-400">Supports .xlsx, .xls, .csv, .json, .txt</p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={triggerFileInput}
+              disabled={isUploading}
+              className="btn-secondary text-sm"
+            >
               {isUploading ? '⏳ Processing...' : '📁 Choose File'}
             </button>
-            <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv,.json,.txt" onChange={handleFileUpload} disabled={isUploading} className="hidden" />
-            {fileName && <span className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">📄 {fileName}</span>}
-            <button type="button" onClick={clearForm} className="px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition shadow-sm">Clear All</button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv,.json,.txt"
+              onChange={handleFileUpload}
+              disabled={isUploading}
+              className="hidden"
+            />
+            {fileName && (
+              <span className="text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded border border-gray-100">
+                📄 {fileName}
+              </span>
+            )}
           </div>
-          <p className="text-xs text-gray-400">Supports: Excel (.xlsx, .xls), CSV, JSON, TXT (SCORE exports)</p>
         </div>
         {isUploading && <div className="mt-2 text-sm text-[#004696]">⏳ Processing file...</div>}
-        {uploadError && <div className="mt-2 text-sm text-red-600">❌ {uploadError}</div>}
+        {uploadError && <div className="mt-2 text-sm text-red-500">❌ {uploadError}</div>}
       </div>
+
+      {/* Raw Text Area */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">📝 Or Paste Raw Client Data</label>
-        <textarea name="rawText" placeholder="Paste raw client data here (SCORE export, etc.)..." value={clientData.rawText || ''} onChange={handleChange} className="input-field min-h-[150px] font-mono text-sm" />
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          📝 Paste raw client data
+        </label>
+        <textarea
+          name="rawText"
+          placeholder="Paste SCORE export, client notes, or any raw text here..."
+          value={clientData.rawText || ''}
+          onChange={handleChange}
+          className="textarea-field min-h-[100px] font-mono text-xs"
+        />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input type="text" name="name" placeholder="Client Name *" value={clientData.name} onChange={handleChange} className="input-field" required />
-        <input type="text" name="company" placeholder="Company/Business" value={clientData.company} onChange={handleChange} className="input-field" />
-        <input type="email" name="email" placeholder="Email" value={clientData.email} onChange={handleChange} className="input-field" />
-        <input type="text" name="phone" placeholder="Phone" value={clientData.phone} onChange={handleChange} className="input-field" />
+
+      <div className="divider"></div>
+
+      {/* Fields */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Client Name *</label>
+          <input
+            type="text"
+            name="name"
+            placeholder="e.g. Wesley Maedo"
+            value={clientData.name}
+            onChange={handleChange}
+            className="input-field"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Business / Company</label>
+          <input
+            type="text"
+            name="company"
+            placeholder="e.g. Maedo & Woo Chiropractic"
+            value={clientData.company}
+            onChange={handleChange}
+            className="input-field"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="client@example.com"
+            value={clientData.email}
+            onChange={handleChange}
+            className="input-field"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <input
+            type="text"
+            name="phone"
+            placeholder="(555) 123-4567"
+            value={clientData.phone}
+            onChange={handleChange}
+            className="input-field"
+          />
+        </div>
       </div>
     </div>
   );
