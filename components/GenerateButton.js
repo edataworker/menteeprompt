@@ -34,20 +34,27 @@ export default function GenerateButton({
   };
 
   return (
-    <button
-      onClick={generateExcel}
-      disabled={isGenerating}
-      className="btn-primary flex items-center justify-center gap-2"
-    >
-      {isGenerating ? (
-        <>
-          <span className="animate-spin">⏳</span> Generating...
-        </>
-      ) : (
-        <>
-          🚀 Generate Clean Excel for Grok
-        </>
+    <div className="flex flex-col items-center gap-2">
+      <button
+        onClick={generateExcel}
+        disabled={isGenerating}
+        className="btn-primary text-base px-10 py-3.5 w-full sm:w-auto"
+      >
+        {isGenerating ? (
+          <>
+            <span className="spinner"></span> Generating...
+          </>
+        ) : (
+          <>
+            <span className="text-lg">🚀</span> Generate Clean Excel for Grok
+          </>
+        )}
+      </button>
+      {selectedPrompts.length > 0 && (
+        <p className="text-xs text-gray-400">
+          {selectedPrompts.length} prompt{selectedPrompts.length > 1 ? 's' : ''} selected
+        </p>
       )}
-    </button>
+    </div>
   );
 }
